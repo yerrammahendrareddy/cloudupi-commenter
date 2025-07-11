@@ -1,6 +1,8 @@
-
 import os
 import requests
+import json
+from utils.cost_calculator import calculate_cost
+from utils.comment_builder import build_comment
 
 REPO = os.getenv("GITHUB_REPOSITORY")
 REF = os.getenv("GITHUB_REF", "")
@@ -15,12 +17,14 @@ def post_comment(pr_number, comment):
     }
     response = requests.post(url, headers=headers, json={"body": comment})
     if response.status_code == 201:
-        print("✅ Comment posted successfully!")
+        print("Comment posted successfully!")
     else:
-        print(f"❌ Failed to post comment: {response.status_code}, {response.text}")
+        print(f"Failed to post comment: {response.status_code}, {response.text}")
 
 if __name__ == "__main__":
     if not PR_NUMBER:
-        print("❌ PR number not found.")
+        print("PR number not found.")
     else:
-        post_comment(PR_NUMBER, "🧮 CloudUPI Cost Estimate: ₹12,000/mo (estimated)")
+        cost_data = calculate_cost("infra_diff.json")
+        comment = build_comment(cost_data)
+        post_comment(PR_NUMBER, comment)
