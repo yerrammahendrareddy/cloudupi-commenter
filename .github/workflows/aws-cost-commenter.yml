@@ -17,9 +17,9 @@ jobs:
           python-version: 3.11
 
       - name: Install dependencies
-        run: pip install -r aws_cost_estimator/requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Estimate AWS Cost
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python aws_cost_estimator/main.py
+        run: python main.py
