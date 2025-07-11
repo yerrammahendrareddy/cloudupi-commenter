@@ -21,6 +21,6 @@ def post_comment(pr_number, comment):
 
 if __name__ == "__main__":
     if not PR_NUMBER:
-        print("❌ PR number not found.")
+        print("PR number not found.")
     else:
         post_comment(PR_NUMBER, "🧮 CloudUPI Cost Estimate: ₹12,000/mo (estimated)")
