@@ -1,21 +1,28 @@
-def estimate_cost(resources):
+import json
+
+def calculate_cost(file_path):
+    with open(file_path) as f:
+        resources = json.load(f)
+
     total_cost = 0
-    summary_lines = []
+    breakdown = []
 
-    for res in resources:
-        cost = 0
-        if res["service"] == "ec2":
-            instance = res["instance_type"]
-            region = res["region"]
-            if instance == "t3.medium" and region == "ap-south-1":
-                cost = 3800
-            summary_lines.append(f"• EC2 ({instance}, {region}): ₹{cost}/mo")
+    for resource in resources.get("Resources", []):
+        service = resource["Service"]
+        config = resource["Config"]
 
-        elif res["service"] == "s3":
-            storage_gb = res["storage_gb"]
-            cost = storage_gb * 8  # ₹8 per GB
-            summary_lines.append(f"• S3 ({storage_gb} GB, Standard): ₹{cost}/mo")
+        if service == "EC2":
+            cost = 3800  # Example fixed price for t3.medium ap-south-1
+        elif service == "S3":
+            gb = config.get("StorageGB", 0)
+            cost = gb * 8  # ₹8/GB
+        else:
+            cost = 0
 
         total_cost += cost
+        breakdown.append(f"{service} ({config.get('Type', '')}): ₹{cost}/mo")
 
-    return "\n".join(summary_lines), total_cost
+    return {
+        "total": total_cost,
+        "breakdown": breakdown
+    }
