@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  pull-requests: write  # 🔐 This line grants permission to post comments on PRs
+
 jobs:
   post-comment:
     runs-on: ubuntu-latest

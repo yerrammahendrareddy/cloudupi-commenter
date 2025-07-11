@@ -15,7 +15,7 @@ def post_comment(pr_number, comment):
     }
     response = requests.post(url, headers=headers, json={"body": comment})
     if response.status_code == 201:
-        print("✅ Comment posted successfully!")
+        print("Comment posted successfully!")
     else:
         print(f"Failed to post comment: {response.status_code}, {response.text}")
 
