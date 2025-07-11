@@ -1,11 +1,28 @@
-from utils.cost_estimator import estimate_cost_change
-from utils.commenter import post_comment
+import json
 import os
+from utils.diff_parser import parse_diff
+from utils.cost_calculator import estimate_cost
+from utils.commenter import post_comment
 
-if __name__ == "__main__":
-    pr_number = os.getenv("PR_NUMBER", "1")
-    base_commit = os.getenv("BASE_COMMIT", "")
-    head_commit = os.getenv("HEAD_COMMIT", "")
+REPO = os.getenv("GITHUB_REPOSITORY")
+REF = os.getenv("GITHUB_REF", "")
+TOKEN = os.getenv("GITHUB_TOKEN")
+PR_NUMBER = REF.split("/")[-2] if "refs/pull/" in REF else None
 
-    cost_summary = estimate_cost_change(base_commit, head_commit)
-    post_comment(pr_number, cost_summary)
+if not PR_NUMBER:
+    print("PR number not found.")
+    exit(1)
+
+infra_path = ".cloudupi/infra_diff.json"
+if not os.path.exists(infra_path):
+    print("Infra diff file not found.")
+    exit(1)
+
+with open(infra_path, "r") as f:
+    diff_data = json.load(f)
+
+resources = parse_diff(diff_data)
+summary, cost = estimate_cost(resources)
+
+comment = f"🧮 **CloudUPI Cost Estimator Summary:**\n\n{summary}\n\n**Total Estimated Cost:** ₹{cost}/mo"
+post_comment(REPO, PR_NUMBER, comment, TOKEN)

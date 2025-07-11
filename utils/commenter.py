@@ -1,9 +1,6 @@
 import requests
-import os
 
-def post_comment(pr_number, comment):
-    repo = os.getenv("GITHUB_REPOSITORY")
-    token = os.getenv("GITHUB_TOKEN")
+def post_comment(repo, pr_number, comment, token):
     url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -11,6 +8,6 @@ def post_comment(pr_number, comment):
     }
     response = requests.post(url, headers=headers, json={"body": comment})
     if response.status_code == 201:
-        print("✅ Comment posted")
+        print("✅ Comment posted successfully!")
     else:
         print(f"❌ Failed to post comment: {response.status_code}, {response.text}")

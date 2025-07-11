@@ -1,0 +1,21 @@
+{
+  "changes": [
+    {
+      "type": "resource",
+      "action": "add",
+      "data": {
+        "service": "ec2",
+        "instance_type": "t3.medium",
+        "region": "ap-south-1"
+      }
+    },
+    {
+      "type": "resource",
+      "action": "add",
+      "data": {
+        "service": "s3",
+        "storage_gb": 50
+      }
+    }
+  ]
+}
