@@ -17,7 +17,7 @@ def post_comment(pr_number, comment):
     if response.status_code == 201:
         print("✅ Comment posted successfully!")
     else:
-        print(f"❌ Failed to post comment: {response.status_code}, {response.text}")
+        print(f"Failed to post comment: {response.status_code}, {response.text}")
 
 if __name__ == "__main__":
     if not PR_NUMBER:
