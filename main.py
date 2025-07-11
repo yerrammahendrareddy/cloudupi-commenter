@@ -1,26 +1,33 @@
-
 import os
-import requests
+from utils.git_diff_utils import get_changed_tf_files
+from parser.terraform_parser import extract_resources_from_tf_file
+from pricing_utils import estimate_cost_from_resources
+from comment_utils import post_comment
 
 REPO = os.getenv("GITHUB_REPOSITORY")
 REF = os.getenv("GITHUB_REF", "")
 TOKEN = os.getenv("GITHUB_TOKEN")
 PR_NUMBER = REF.split("/")[-2] if "refs/pull/" in REF else None
 
-def post_comment(pr_number, comment):
-    url = f"https://api.github.com/repos/{REPO}/issues/{pr_number}/comments"
-    headers = {
-        "Authorization": f"Bearer {TOKEN}",
-        "Accept": "application/vnd.github+json"
-    }
-    response = requests.post(url, headers=headers, json={"body": comment})
-    if response.status_code == 201:
-        print("Comment posted successfully!")
-    else:
-        print(f"Failed to post comment: {response.status_code}, {response.text}")
+if not PR_NUMBER:
+    print("❌ PR number not found.")
+    exit(1)
 
-if __name__ == "__main__":
-    if not PR_NUMBER:
-        print("PR number not found.")
-    else:
-        post_comment(PR_NUMBER, "CloudUPI Cost Estimate: ₹12,000/mo (estimated)")
+base_ref = os.getenv("GITHUB_BASE_REF")
+head_ref = os.getenv("GITHUB_HEAD_REF")
+if not base_ref or not head_ref:
+    print("❌ Base or head ref not found.")
+    exit(1)
+
+print(f"🔍 Comparing changes from {base_ref} to {head_ref}...")
+
+changed_files = get_changed_tf_files(base_ref, head_ref)
+all_resources = []
+
+for tf_file in changed_files:
+    resources = extract_resources_from_tf_file(tf_file)
+    all_resources.extend(resources)
+
+estimated_cost = estimate_cost_from_resources(all_resources)
+comment = f"🧮 CloudUPI Cost Estimate: **${estimated_cost:.2f}/mo** (based on modified infra)"
+post_comment(PR_NUMBER, comment, REPO, TOKEN)
